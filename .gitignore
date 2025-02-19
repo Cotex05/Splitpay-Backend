@@ -1,0 +1,105 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Ignore compiled Java class files ###
+*.class
+*.jar
+*.war
+*.ear
+
+### Ignore Maven & Gradle build directories ###
+/target/
+/build/
+
+### Ignore IDE & Editor-specific files ###
+# IntelliJ IDEA
+/.idea/
+/*.iml
+
+# Eclipse
+/.classpath
+/.project
+/.settings/
+
+# VS Code
+/.vscode/
+
+# NetBeans
+/*.nb-gradle/
+
+### Ignore logs & temporary files ###
+*.log
+logs/
+nohup.out
+app.log
+debug.log
+hs_err_pid*.log
+
+### Ignore system & OS-generated files ###
+.DS_Store
+Thumbs.db
+desktop.ini
+
+### Ignore Spring Boot environment files ###
+.env
+.env.local
+.env.*.local
+
+### Ignore database files ###
+*.db
+*.sqlite
+/data/
+*.h2.db
+*.mv.db
+*.ldb
+
+### Ignore sensitive application configuration ###
+/src/main/resources/application.properties
+/src/main/resources/application.yml
+/src/main/resources/application-*.properties
+/src/main/resources/application-*.yml
+
+### Ignore dependency directories ###
+/node_modules/
+/out/
+
+### Ignore Docker & Kubernetes files (if applicable) ###
+/docker-compose.override.yml
+/.dockerignore
+/k8s/
+
+### Ignore coverage & testing reports ###
+/coverage/
+/test-output/
+/jacoco/
