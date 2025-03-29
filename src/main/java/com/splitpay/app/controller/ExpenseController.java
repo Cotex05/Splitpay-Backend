@@ -1,11 +1,13 @@
 package com.splitpay.app.controller;
 
+import com.splitpay.app.config.AppConstants;
 import com.splitpay.app.payload.*;
 import com.splitpay.app.payload.dto.ExpenseDTO;
 import com.splitpay.app.security.response.MessageResponse;
 import com.splitpay.app.service.ExpenseService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +34,13 @@ public class ExpenseController {
     }
 
     @GetMapping("/groups/{groupId}")
-    public ResponseEntity<List<ExpenseDTO>> getAllExpensesOfGroup(@PathVariable Long groupId) {
-        List<ExpenseDTO> expenses = expenseService.getAllExpensesFromGroup(groupId);
+    public ResponseEntity<ExpenseResponse> getAllExpensesOfGroup(@PathVariable Long groupId,
+                                                                  @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+                                                                  @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+                                                                  @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_EXPENSE_BY, required = false) String sortBy,
+                                                                  @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder,
+                                                                  Sort sort) {
+        ExpenseResponse expenses = expenseService.getAllExpensesFromGroup(groupId, pageNumber, pageSize, sortBy, sortOrder);
         return new ResponseEntity<>(expenses, HttpStatus.OK);
     }
 
@@ -68,7 +75,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/groups/{groupId}/user/cashflow")
-    public ResponseEntity<BalanceResponse> getUserBalanceOfGroup(@PathVariable Long groupId){
+    public ResponseEntity<BalanceResponse> getUserBalanceOfGroup(@PathVariable Long groupId) {
         BalanceResponse balanceResponse = expenseService.getUserBalanceInGroup(groupId);
         return new ResponseEntity<>(balanceResponse, HttpStatus.OK);
     }

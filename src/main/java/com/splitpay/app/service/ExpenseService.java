@@ -10,7 +10,7 @@ public interface ExpenseService {
 
     void removeExpense(Long expenseId, Long groupId);
 
-    List<ExpenseDTO> getAllExpensesFromGroup(Long groupId);
+    ExpenseResponse getAllExpensesFromGroup(Long groupId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
     List<ExpenseDTO> getUsersExpensesFromGroup(Long groupId);
 

@@ -13,6 +13,11 @@ import com.splitpay.app.util.AuthUtil;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,7 +99,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         // Distribution according to sharedUsers
         Integer totalMembers = expenseRequest.getSharedUsers().size();
-        if(totalMembers == 0){
+        if (totalMembers == 0) {
             throw new APIException("Expense Shares not added to group!");
         }
         double sharedAmount = expenseRequest.getAmount() / totalMembers;
@@ -117,7 +122,7 @@ public class ExpenseServiceImpl implements ExpenseService {
             expenseShare.setExpense(savedExpense);
             expenseShare.setUser(owedUser);
             // Also adding share in round figures upto 2 decimal
-            expenseShare.setAmount((Math.round(sharedAmount)*100)/100.0);
+            expenseShare.setAmount((Math.round(sharedAmount) * 100) / 100.0);
             expenseShare.setSettled(false);
             shares.add(expenseShare);
         }
@@ -148,17 +153,35 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public List<ExpenseDTO> getAllExpensesFromGroup(Long groupId) {
+    public ExpenseResponse getAllExpensesFromGroup(Long groupId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        Specification<Expense> spec = Specification.where(null);
+        spec = spec.and((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("groupId"), groupId));
+
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Group", "id", groupId));
 
         userService.checkUserExistsInGroup(groupId);
 
-        List<Expense> expenses = expenseRepository.findAllByGroupId(groupId);
+        Page<Expense> expensePage = expenseRepository.findAllByGroupId(groupId, pageDetails);
+        List<Expense> expenses = expensePage.getContent();
         List<ExpenseDTO> expenseDTOs = expenses.stream()
                 .map(expense -> modelMapper.map(expense, ExpenseDTO.class))
                 .toList();
-        return expenseDTOs;
+        ExpenseResponse expenseResponse = new ExpenseResponse();
+        expenseResponse.setContent(expenseDTOs);
+        expenseResponse.setPageNumber(expensePage.getNumber());
+        expenseResponse.setPageSize(expensePage.getSize());
+        expenseResponse.setTotalElements(expensePage.getTotalElements());
+        expenseResponse.setTotalPages(expensePage.getTotalPages());
+        expenseResponse.setLastPage(expensePage.isLast());
+        return expenseResponse;
     }
 
     @Override
@@ -312,8 +335,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         for (BalanceGraphResponse balanceGraphResponse : userBalanceGraphResponse.getToSend()) {
             cashOutFlow += balanceGraphResponse.getAmount();
         }
-        balanceResponse.setCashIn(Math.round((cashInFlow*100))/100.0);
-        balanceResponse.setCashOut(Math.round(cashOutFlow*100)/100.0);
+        balanceResponse.setCashIn(Math.round((cashInFlow * 100)) / 100.0);
+        balanceResponse.setCashOut(Math.round(cashOutFlow * 100) / 100.0);
         return balanceResponse;
     }
 
@@ -325,7 +348,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         Double totalAmountSpent = 0.0;
         Double totalAmount = expenseRepository.findTotalAmountByUserId(currUser.getUserId());
-        if(totalAmount != null) {
+        if (totalAmount != null) {
             totalAmountSpent = totalAmount;
         }
         Double totalAmountIn = 0.0;
@@ -358,7 +381,7 @@ public class ExpenseServiceImpl implements ExpenseService {
             LocalDate createdAt = LocalDate.parse(expense[0].toString());
             DayOfWeek dayOfWeek = createdAt.getDayOfWeek();
 
-            String dayName = dayOfWeek.toString().charAt(0) + dayOfWeek.toString().substring(1,3).toLowerCase();
+            String dayName = dayOfWeek.toString().charAt(0) + dayOfWeek.toString().substring(1, 3).toLowerCase();
             weeklyExpenseStatsResponse.setDate(createdAt);
             weeklyExpenseStatsResponse.setSpentAmount((Double) expense[1]);
             weeklyExpenseStatsResponse.setWeekday(dayName);

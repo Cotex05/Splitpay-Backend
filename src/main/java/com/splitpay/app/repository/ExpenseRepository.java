@@ -1,6 +1,8 @@
 package com.splitpay.app.repository;
 
 import com.splitpay.app.model.Expense;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +18,9 @@ import java.util.Optional;
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("SELECT e FROM Expense e where e.group.groupId = ?1 order by e.createdAt desc")
     List<Expense> findAllByGroupId(Long groupId);
+
+    @Query("SELECT e FROM Expense e where e.group.groupId = ?1 order by e.createdAt desc")
+    Page<Expense> findAllByGroupId(Long groupId, Pageable pageable);
 
     @Query("SELECT E FROM Expense E WHERE E.group.groupId = ?1 AND E.paidBy.userId = ?2")
     List<Expense> findAllByGroupIdAndUserId(Long groupId, Long userId);
