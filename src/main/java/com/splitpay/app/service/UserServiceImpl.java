@@ -5,6 +5,7 @@ import com.splitpay.app.exception.ResourceNotFoundException;
 import com.splitpay.app.model.Group;
 import com.splitpay.app.model.GroupMember;
 import com.splitpay.app.model.User;
+import com.splitpay.app.payload.ProfileDataRequest;
 import com.splitpay.app.payload.dto.UserDTO;
 import com.splitpay.app.repository.GroupMemberRepository;
 import com.splitpay.app.repository.GroupRepository;
@@ -67,6 +68,18 @@ public class UserServiceImpl implements UserService {
         List<User> foundUsers = userRepository.findAllByUserNameContainingIgnoreCase(query);
         foundUsers.remove(currUser); // exclude current user from search
         return foundUsers.stream().map(user -> modelMapper.map(user, UserDTO.class)).toList();
+    }
+
+    @Override
+    public void updateUserProfile(ProfileDataRequest profileDataRequest) {
+        User currUser = authUtil.loggedInUser();
+        if(!currUser.getEmail().equals(profileDataRequest.getEmail())) {
+            throw new APIException("User doesn't exists in the profile");
+        }
+        User user = userRepository.findByEmail(profileDataRequest.getEmail()).orElseThrow(() -> new ResourceNotFoundException("User", "email", profileDataRequest.getEmail()));
+        // only fullname updated
+        user.setFullName(profileDataRequest.getFullName());
+        userRepository.save(user);
     }
 
 

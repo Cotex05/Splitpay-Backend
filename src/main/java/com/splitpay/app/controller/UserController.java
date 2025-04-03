@@ -3,9 +3,11 @@ package com.splitpay.app.controller;
 import com.splitpay.app.exception.APIException;
 import com.splitpay.app.exception.ResourceNotFoundException;
 import com.splitpay.app.model.User;
+import com.splitpay.app.payload.ProfileDataRequest;
 import com.splitpay.app.payload.UserDetailResponse;
 import com.splitpay.app.payload.dto.UserDTO;
 import com.splitpay.app.repository.UserRepository;
+import com.splitpay.app.security.response.MessageResponse;
 import com.splitpay.app.service.UserService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -45,4 +49,10 @@ public class UserController {
         return new ResponseEntity<>(userDTOList, HttpStatus.OK);
     }
 
+    @PutMapping("/profile/save")
+    public ResponseEntity<?> updateUserProfile(@RequestBody ProfileDataRequest profileDataRequest) {
+        userService.updateUserProfile(profileDataRequest);
+        return ResponseEntity.ok().body(new MessageResponse("Profile updated successfully"));
+
+    }
 }
